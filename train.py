@@ -7,6 +7,10 @@ from torch import optim
 import copy
 import dataprepare as prp
 from tqdm import tqdm
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torchvision.transforms.functional import get_image_num_channels
+import random
+import wandb
 
 
 
@@ -21,7 +25,6 @@ class myTumorDetection(nn.Module):
         num_classes = params['num_classes']
         self.dropout_rate = params['dropout_rate']
 
-        
         self.conv1 = nn.Conv2d(num_channels, initial_filters, kernel_size=3)
         height ,width = findConv2dparams(height, width, self.conv1)
         self.conv2 = nn.Conv2d(initial_filters, 2*initial_filters, kernel_size=3)
@@ -37,22 +40,36 @@ class myTumorDetection(nn.Module):
         self.ly1 = nn.Dropout()
         self.fc1 = nn.Linear(self.flatten, num_fc1)
         self.ly2 = nn.Dropout()
-        self.fc2 = nn.Linear(num_fc1, num_classes)
+        self.fc2 = nn.Linear(num_fc1, 50)
+        self.fc3 = nn.Linear(50, num_classes)
 
     def forward(self, X):
         X = F.relu(self.conv1(X))
         X = F.max_pool2d(X,2,2)
+        X = nn.BatchNorm2d(8)(X)
+
         X = F.relu(self.conv2(X))
         X = F.max_pool2d(X,2,2)
+        X = nn.BatchNorm2d(16)(X)
+
+
         X = F.relu(self.conv3(X))
         X = F.max_pool2d(X,2,2)
+        X = nn.BatchNorm2d(32)(X)
+
+
         X = F.relu(self.conv4(X))
         X = F.max_pool2d(X,2,2)
+        X = nn.BatchNorm2d(64)(X)
+
         X = X.view(-1,self.flatten)
         X = F.dropout(X, self.dropout_rate)
         X = F.relu(self.fc1(X))
-        X = F.dropout(X, self.dropout_rate)
-        X = self.fc2(X)
+
+
+        #X = F.dropout(X, self.dropout_rate)
+        X = F.relu(self.fc2(X))
+        X = self.fc3(X)
         return F.log_softmax(X, dim = 1)
     
 
@@ -92,10 +109,13 @@ def model_training(model, dataloader, optimizer, loss_fn, device):
 
         optimizer.zero_grad()
         y_pred = model(x)
-
         loss = loss_fn(y_pred, y)
-        accuracy = calculate_accuracy(y_pred, y)
+        
+        loss.backward()
         optimizer.step()
+        accuracy = calculate_accuracy(y_pred, y)
+        
+        
         epoch_acc += accuracy.item()
         epoch_loss += loss.item()
 
@@ -111,16 +131,18 @@ def model_validation(model, dataloader, optimizer,loss_fn,device):
 
         optimizer.zero_grad()
         pred = model(x)
-
+        print(f"Prediction for this run {pred}")
         optimizer.step()
         acc = calculate_accuracy(pred, y)
         loss = loss_fn(pred, y)
+        
 
         epoch_acc += acc.item()
         epoch_loss += loss.item()
 
     return epoch_acc/len(dataloader), epoch_loss/len(dataloader)
         
+
 #prp.load_data('./Brain Tumor Data Set')
 train_set, test_set,dev_set = prp.luismi_transformations('./brain')
 print(f"Training dataset length {len(train_set)} \n Dev dataset length {len(dev_set)} \n Test dataset length {len(test_set)}")
@@ -130,33 +152,40 @@ train_loader, test_loader,dev_loader = prp.data_loaders(train_set, test_set,dev_
 params_model={
         "shape_in": (3,256,256), 
         "initial_filters": 8,    
-        "num_fc1": 100,
+        "num_fc1": 150,
         "dropout_rate": 0.25,
         "num_classes": 2
         }
-
-epochs = 5
+lr = 3e-4
+epochs = 60
 model = myTumorDetection(params_model)
-optimizer = optim.Adam(model.parameters(), lr = 3e-4)
+optimizer = optim.Adam(model.parameters(), lr = lr)
 loss_fn = nn.CrossEntropyLoss()
 device = torch.device("cpu")
 
 best_valid_loss = float('inf')
+lambda1 = lambda epochs: epochs/30
+#lr_scheduler = optim.lr_scheduler.LambdaLR(optimizer,lambda1)
 
-for i in range(epochs): 
-    epoch_acc, epoch_loss = model_training(model, train_loader, optimizer, loss_fn,device)
-    val_acc, val_loss = model_validation(model, dev_loader, optimizer, loss_fn,device)
+print(optimizer.state_dict())
+# for i in range(epochs):
+     
+#     epoch_acc, epoch_loss = model_training(model, train_loader, optimizer, loss_fn,device)
+#     val_acc, val_loss = model_validation(model, dev_loader, optimizer, loss_fn,device)
+#     #lr_scheduler.step()
+#     print(f"Learning rate value {optimizer.state_dict()['param_groups'][0]['lr']}")  
 
-    if val_loss < best_valid_loss:
-        best_valid_loss = val_loss
-        torch.save(model.state_dict(), 'tut2-model.pt')
-    print(f"Epoch {i}\nTrain acc {epoch_acc} | Train loss {epoch_loss}")
-    print(f"Epoch {i}\nVal acc {val_acc} | Val loss {val_loss}")
-    print(f"____________________________________________________________")
+#     if val_loss < best_valid_loss: 
+#         best_valid_loss = val_loss
+#         torch.save(model.state_dict(), 'tut2-model.pt')
+#     print(f"____________________________________________________________")
+#     print(f"Epoch {i}\nTrain acc {epoch_acc * 100} | Train loss {epoch_loss * 100}")
+#     print(f"Epoch {i}\nVal acc {val_acc * 100} | Val loss {val_loss* 100}")
+for i in range(5):
     model.load_state_dict(torch.load('tut2-model.pt'))
     test_acc, test_loss = model_validation(model, test_loader, optimizer, loss_fn, device)
-    print(f"Model final testing\nTest acc {test_acc} | Test loss {test_loss}")
-
+    print(f"Model final testing\nTest acc {test_acc * 100} | Test loss {test_loss* 100}")
+    print(f"____________________________________________________________")
 
 
         

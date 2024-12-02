@@ -25,12 +25,13 @@ def make_transformations(dataset_directory):
          transforms.RandomHorizontalFlip(p = 0.5),
          transforms.RandomRotation(30),
          transforms.ToTensor(),
-         transforms.Normalize(mean = [0.485,0.456,0.406], std =[0.229, 0.224, 0.225])
+         
         ]
     )
     
     train_set = torchvision.datasets.ImageFolder(dataset_directory.joinpath('train'), transform=train_formations)
     train_set.transform
+    
     test_set = torchvision.datasets.ImageFolder(dataset_directory.joinpath('val'),transform=train_formations)
     test_set.transform
     datasets = [train_set,test_set]
@@ -39,30 +40,45 @@ def make_transformations(dataset_directory):
 def luismi_transformations(dataset_directory):
     dataset_directory = pathlib.Path(dataset_directory)
     
-    train_formations = transforms.Compose(
+    train_formations_final = transforms.Compose(
         [
          transforms.Resize((256,256)),
          transforms.RandomVerticalFlip(p = 0.5),
          transforms.RandomHorizontalFlip(p = 0.5),
          transforms.RandomRotation(30),
          transforms.ToTensor(),
-         transforms.Normalize(mean = [0.485,0.456,0.406], std =[0.229, 0.224, 0.225])
+         transforms.Normalize(mean = [0.2451,0.2453, 0.2454], std =[0.2259,0.2259,0.2260])
         ]
     )
+    train_set = torchvision.datasets.ImageFolder(dataset_directory.joinpath('train'), transform=train_formations_final)
+
 
     test_transformations = transforms.Compose([
         transforms.Resize((256,256)),
         transforms.ToTensor(),
-        transforms.Normalize(mean = [0.485,0.456,0.406], std =[0.229, 0.224, 0.225])
+        transforms.Normalize(mean = [0.2451,0.2453, 0.2454], std =[0.2259,0.2259,0.2260])
     ])
-    
-    train_set = torchvision.datasets.ImageFolder(dataset_directory.joinpath('train'), transform=train_formations)
 
     test_set = torchvision.datasets.ImageFolder(dataset_directory.joinpath('test'),transform=test_transformations)
 
     dev_set = torchvision.datasets.ImageFolder(dataset_directory.joinpath('val'), transform=test_transformations)
     
     return train_set, test_set, dev_set
+
+def compute_mean_std(train_set):
+    loader = DataLoader(train_set, batch_size=64, shuffle=False)
+    mean = 0
+    std = 0
+    total_images = 0
+    
+    for images,_ in loader:
+        images = images.view(images.size(0), images.size(1), -1)
+        mean += images.mean(2).sum(0)
+        std += images.std(2).sum(0)
+        total_images += images.size(0)
+    mean /= total_images
+    std /= total_images
+    return mean,std
 
 def data_visualization(train_set, test_set, cols,rows):
     

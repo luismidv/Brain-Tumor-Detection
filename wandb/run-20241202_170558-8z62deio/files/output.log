@@ -1,0 +1,49 @@
+{'state': {}, 'param_groups': [{'lr': 0.0003, 'betas': (0.9, 0.999), 'eps': 1e-08, 'weight_decay': 0, 'amsgrad': False, 'maximize': False, 'foreach': None, 'capturable': False, 'differentiable': False, 'fused': None, 'params': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]}]}
+C:\Users\luism\OneDrive\Escritorio\DesktopML\finalTumorDetection\train.py:187: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+Learning rate value 0.0003
+____________________________________________________________
+Epoch 0
+Train acc 67.574910567357 | Train loss 60.42111227145561
+Epoch 0
+Val acc 79.43412214517593 | Val loss 49.29923042654991
+  model.load_state_dict(torch.load('tut2-model.pt'))
+                                                                                                                       
+Model final testing
+Test acc 76.64062529802322 | Test loss 49.581293016672134
+____________________________________________________________
+Learning rate value 0.0003
+____________________________________________________________
+Epoch 1
+Train acc 77.81585418261014 | Train loss 47.524699752147384
+Epoch 1
+Val acc 80.42652010917664 | Val loss 40.08552208542824
+Model final testing
+Test acc 82.73437470197678 | Test loss 40.18735587596893
+____________________________________________________________
+Learning rate value 0.0003
+____________________________________________________________
+Epoch 2
+Train acc 83.23512966816241 | Train loss 38.03603062262902
+Epoch 2
+Val acc 82.45354741811752 | Val loss 37.15541213750839
+Model final testing
+Test acc 84.84375029802322 | Test loss 36.61006912589073
+____________________________________________________________
+Learning rate value 0.0003
+____________________________________________________________
+Epoch 3
+Train acc 84.70091682214004 | Train loss 33.382104062117065
+Epoch 3
+Val acc 84.61782038211823 | Val loss 30.326633900403976
+Model final testing
+Test acc 89.53125029802322 | Test loss 27.677910774946213
+____________________________________________________________
+Learning rate value 0.0003
+____________________________________________________________
+Epoch 4
+Train acc 86.41882823063777 | Train loss 31.8831172814736
+Epoch 4
+Val acc 88.20734769105911 | Val loss 27.147338539361954
+Model final testing
+Test acc 90.31250029802322 | Test loss 27.07488387823105
+____________________________________________________________

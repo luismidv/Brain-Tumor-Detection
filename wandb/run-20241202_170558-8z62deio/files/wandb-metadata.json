@@ -1,0 +1,32 @@
+{
+  "os":  "Windows-10-10.0.22631-SP0",
+  "python":  "3.11.4",
+  "startedAt":  "2024-12-02T16:05:58.165674Z",
+  "program":  "C:\\Users\\luism\\OneDrive\\Escritorio\\DesktopML\\finalTumorDetection\\train.py",
+  "codePath":  "train.py",
+  "git":  {
+    "remote":  "https://github.com/luismidv/Brain-Tumor-Detection.git",
+    "commit":  "8f5b109684f4080c7d3945eb0af10489618dc228"
+  },
+  "email":  "perezmartluismiguel@gmail.com",
+  "root":  "C:\\Users\\luism\\OneDrive\\Escritorio\\DesktopML\\finalTumorDetection",
+  "host":  "Luismi",
+  "username":  "luism",
+  "executable":  "C:\\Users\\luism\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+  "codePathLocal":  "train.py",
+  "cpu_count":  14,
+  "cpu_count_logical":  20,
+  "disk":  {
+    "/":  {
+      "total":  "499228078080",
+      "used":  "429070589952"
+    }
+  },
+  "memory":  {
+    "total":  "16984236032"
+  },
+  "cpu":  {
+    "count":  14,
+    "countLogical":  20
+  }
+}
