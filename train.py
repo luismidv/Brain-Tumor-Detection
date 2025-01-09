@@ -7,6 +7,8 @@ from torch import optim
 import copy
 import dataprepare as prp
 from tqdm import tqdm
+from PIL import Image
+from torchvision import transforms
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchvision.transforms.functional import get_image_num_channels
 import random
@@ -141,7 +143,29 @@ def model_validation(model, dataloader, optimizer,loss_fn,device):
         epoch_loss += loss.item()
 
     return epoch_acc/len(dataloader), epoch_loss/len(dataloader)
-        
+
+def model_testing(model, input, loss_fn):
+
+    test_transformations = transforms.Compose([
+        transforms.Resize((256, 256)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.2451, 0.2453, 0.2454], std=[0.2259, 0.2259, 0.2260])
+    ])
+
+    image = Image.open("./selftest/gato.jpg")
+    image_array = np.array(image)
+    image_torch = torch.tensor(image_array)
+    #image_torch = test_transformations(image_array)
+    #print(f"Checking image type before model {type(image_torch)}")
+
+    for x,y in input:
+        print(type(x))
+        output = model(image_torch)
+        loss = loss_fn(output, y)
+        accuracy = calculate_accuracy(output, y)
+        #print(output)
+        print(f"Model stats for this test: \nAccuracy {accuracy*100} | Loss {loss*100}")
+        break
 
 #prp.load_data('./Brain Tumor Data Set')
 train_set, test_set,dev_set = prp.luismi_transformations('./brain')
@@ -181,11 +205,15 @@ print(optimizer.state_dict())
 #     print(f"____________________________________________________________")
 #     print(f"Epoch {i}\nTrain acc {epoch_acc * 100} | Train loss {epoch_loss * 100}")
 #     print(f"Epoch {i}\nVal acc {val_acc * 100} | Val loss {val_loss* 100}")
-for i in range(5):
-    model.load_state_dict(torch.load('tut2-model.pt'))
-    test_acc, test_loss = model_validation(model, test_loader, optimizer, loss_fn, device)
-    print(f"Model final testing\nTest acc {test_acc * 100} | Test loss {test_loss* 100}")
-    print(f"____________________________________________________________")
+
+
+model.load_state_dict(torch.load('tut2-model.pt'))
+model_testing(model,test_loader, loss_fn)
+
+
+#test_acc, test_loss = model_validation(model, test_loader, optimizer, loss_fn, device)
+#print(f"Model final testing\nTest acc {test_acc * 100} | Test loss {test_loss* 100}")
+#print(f"____________________________________________________________")
 
 
         
