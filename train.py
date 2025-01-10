@@ -42,36 +42,33 @@ class myTumorDetection(nn.Module):
         self.ly1 = nn.Dropout()
         self.fc1 = nn.Linear(self.flatten, num_fc1)
         self.ly2 = nn.Dropout()
-        self.fc2 = nn.Linear(num_fc1, 50)
-        self.fc3 = nn.Linear(50, num_classes)
+        self.fc2 = nn.Linear(num_fc1, num_classes)
+        #self.fc3 = nn.Linear(50, num_classes)
 
     def forward(self, X):
         X = F.relu(self.conv1(X))
         X = F.max_pool2d(X,2,2)
-        X = nn.BatchNorm2d(8)(X)
+        #X = nn.BatchNorm2d(8)(X)
 
         X = F.relu(self.conv2(X))
         X = F.max_pool2d(X,2,2)
-        X = nn.BatchNorm2d(16)(X)
-
+        #X = nn.BatchNorm2d(16)(X)
 
         X = F.relu(self.conv3(X))
         X = F.max_pool2d(X,2,2)
-        X = nn.BatchNorm2d(32)(X)
-
+        #X = nn.BatchNorm2d(32)(X)
 
         X = F.relu(self.conv4(X))
         X = F.max_pool2d(X,2,2)
-        X = nn.BatchNorm2d(64)(X)
+        #X = nn.BatchNorm2d(64)(X)
 
         X = X.view(-1,self.flatten)
-        X = F.dropout(X, self.dropout_rate)
         X = F.relu(self.fc1(X))
-
+        X = F.dropout(X, self.dropout_rate)
 
         #X = F.dropout(X, self.dropout_rate)
-        X = F.relu(self.fc2(X))
-        X = self.fc3(X)
+        X = self.fc2(X)
+        #X = self.fc3(X)
         return F.log_softmax(X, dim = 1)
     
 
@@ -149,23 +146,29 @@ def model_testing(model, input, loss_fn):
     test_transformations = transforms.Compose([
         transforms.Resize((256, 256)),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.2451, 0.2453, 0.2454], std=[0.2259, 0.2259, 0.2260])
     ])
 
-    image = Image.open("./selftest/gato.jpg")
-    image_array = np.array(image)
-    image_torch = torch.tensor(image_array)
+    image_list = ["./selftest/Cancer (8).jpg","./selftest/Cancer (18).jpg", "./selftest/Not Cancer  (3).jpg", "./selftest/Not Cancer  (11).jpg"]
+    for image in image_list:
+        image = Image.open(image)
+        image_resized = test_transformations(image)
+
+
+        image_resized = image_resized.view(1,3,256,256)
+        output = model(image_resized)
+        print(f"Output {output}")
+
+
+    #image_torch = image_torch.view(1,3,256,256)
+    #output = model(image_torch)
     #image_torch = test_transformations(image_array)
     #print(f"Checking image type before model {type(image_torch)}")
 
-    for x,y in input:
-        print(type(x))
-        output = model(image_torch)
-        loss = loss_fn(output, y)
-        accuracy = calculate_accuracy(output, y)
-        #print(output)
-        print(f"Model stats for this test: \nAccuracy {accuracy*100} | Loss {loss*100}")
-        break
+    #for x,y in input:
+        #print(f"Input type {type(x)}\n Input shape {x.shape}")
+        #output = model(x)
+    #accuracy = calculate_accuracy(output, y)
+
 
 #prp.load_data('./Brain Tumor Data Set')
 train_set, test_set,dev_set = prp.luismi_transformations('./brain')
@@ -176,7 +179,7 @@ train_loader, test_loader,dev_loader = prp.data_loaders(train_set, test_set,dev_
 params_model={
         "shape_in": (3,256,256), 
         "initial_filters": 8,    
-        "num_fc1": 150,
+        "num_fc1": 100,
         "dropout_rate": 0.25,
         "num_classes": 2
         }
@@ -192,19 +195,19 @@ lambda1 = lambda epochs: epochs/30
 #lr_scheduler = optim.lr_scheduler.LambdaLR(optimizer,lambda1)
 
 print(optimizer.state_dict())
-# for i in range(epochs):
+for i in range(epochs):
      
-#     epoch_acc, epoch_loss = model_training(model, train_loader, optimizer, loss_fn,device)
-#     val_acc, val_loss = model_validation(model, dev_loader, optimizer, loss_fn,device)
-#     #lr_scheduler.step()
-#     print(f"Learning rate value {optimizer.state_dict()['param_groups'][0]['lr']}")  
+     epoch_acc, epoch_loss = model_training(model, train_loader, optimizer, loss_fn,device)
+     val_acc, val_loss = model_validation(model, dev_loader, optimizer, loss_fn,device)
+     #lr_scheduler.step()
+     print(f"Learning rate value {optimizer.state_dict()['param_groups'][0]['lr']}")
 
-#     if val_loss < best_valid_loss: 
-#         best_valid_loss = val_loss
-#         torch.save(model.state_dict(), 'tut2-model.pt')
-#     print(f"____________________________________________________________")
-#     print(f"Epoch {i}\nTrain acc {epoch_acc * 100} | Train loss {epoch_loss * 100}")
-#     print(f"Epoch {i}\nVal acc {val_acc * 100} | Val loss {val_loss* 100}")
+     if val_loss < best_valid_loss:
+        best_valid_loss = val_loss
+        torch.save(model.state_dict(), 'tut2-model.pt')
+     print(f"____________________________________________________________")
+     print(f"Epoch {i}\nTrain acc {epoch_acc * 100} | Train loss {epoch_loss * 100}")
+     print(f"Epoch {i}\nVal acc {val_acc * 100} | Val loss {val_loss* 100}")
 
 
 model.load_state_dict(torch.load('tut2-model.pt'))
