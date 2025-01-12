@@ -68,7 +68,7 @@ class myTumorDetection(nn.Module):
 
         #X = F.dropout(X, self.dropout_rate)
         X = self.fc2(X)
-        #X = self.fc3(X)
+        X = self.fc3(X)
         return F.log_softmax(X, dim = 1)
     
 
@@ -195,19 +195,19 @@ lambda1 = lambda epochs: epochs/30
 #lr_scheduler = optim.lr_scheduler.LambdaLR(optimizer,lambda1)
 
 print(optimizer.state_dict())
-for i in range(epochs):
+#for i in range(epochs):
      
-     epoch_acc, epoch_loss = model_training(model, train_loader, optimizer, loss_fn,device)
-     val_acc, val_loss = model_validation(model, dev_loader, optimizer, loss_fn,device)
+     #epoch_acc, epoch_loss = model_training(model, train_loader, optimizer, loss_fn,device)
+     #val_acc, val_loss = model_validation(model, dev_loader, optimizer, loss_fn,device)
      #lr_scheduler.step()
-     print(f"Learning rate value {optimizer.state_dict()['param_groups'][0]['lr']}")
+     #print(f"Learning rate value {optimizer.state_dict()['param_groups'][0]['lr']}")
 
-     if val_loss < best_valid_loss:
-        best_valid_loss = val_loss
-        torch.save(model.state_dict(), 'tut2-model.pt')
-     print(f"____________________________________________________________")
-     print(f"Epoch {i}\nTrain acc {epoch_acc * 100} | Train loss {epoch_loss * 100}")
-     print(f"Epoch {i}\nVal acc {val_acc * 100} | Val loss {val_loss* 100}")
+     #if val_loss < best_valid_loss:
+        #best_valid_loss = val_loss
+        #torch.save(model.state_dict(), 'tut2-model.pt')
+     #print(f"____________________________________________________________")
+     #print(f"Epoch {i}\nTrain acc {epoch_acc * 100} | Train loss {epoch_loss * 100}")
+     #print(f"Epoch {i}\nVal acc {val_acc * 100} | Val loss {val_loss* 100}")
 
 
 model.load_state_dict(torch.load('tut2-model.pt'))
